@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+repo_root="$(git rev-parse --show-toplevel)"
+tmp_file="$repo_root/.git/pre-commit-missing.txt"
+> "$tmp_file"
+
+find "$repo_root" -type d \
+  -not -path "$repo_root/.git*" \
+  -not -path "$repo_root/.githooks*" \
+  -print0 | while IFS= read -r -d '' dir; do
+  [ "$dir" = "$repo_root" ] && continue
+  if [ -f "$dir/README.md" ] || [ -f "$dir/README" ]; then
+    :
+  else
+    printf '%s\n' "$dir" >> "$tmp_file"
+  fi
+done
+
+if [ -s "$tmp_file" ]; then
+  echo "pre-commit: missing README in these directories:" >&2
+  cat "$tmp_file" >&2
+  rm -f "$tmp_file"
+  exit 1
+fi
+
+rm -f "$tmp_file"
+exit 0

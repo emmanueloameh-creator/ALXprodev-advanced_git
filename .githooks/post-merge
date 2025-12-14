@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+repo_root="$(git rev-parse --show-toplevel)"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+log_file="$repo_root/.git/merge.log"
+
+if [ "$branch" = "master" ] || [ "$branch" = "main" ]; then
+  last_commit="$(git log -1 --pretty=format:'%h %an %ad %s' --date=iso)"
+  echo "$(date -Iseconds) post-merge on $branch: $last_commit" >> "$log_file"
+fi
+
+exit 0
